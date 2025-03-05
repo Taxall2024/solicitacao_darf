@@ -1,4 +1,4 @@
 google_api_python_client==2.163.0
 google_auth_oauthlib==1.2.1
-protobuf==6.30
+protobuf>=3.20,<6
 streamlit==1.41.1
