@@ -13,8 +13,33 @@ import datetime
 from email.header import Header
 
 SCOPES = ["https://www.googleapis.com/auth/gmail.send"]
-CREDENTIALS_PATH = r"C:\Users\bruno.cardoso\Documents\projeto1\credentials.json"
-TOKEN_PATH = r"C:\Users\bruno.cardoso\Documents\projeto1\token.pickle"
+#CREDENTIALS_PATH = 'credentials.json'
+#TOKEN_PATH = "token.pickle"
+
+def get_credentials():
+    google_secrets = st.secrets["google_oauth"]
+
+    credentials_info = {
+        "web": {
+            "client_id": google_secrets["client_id"],
+            "project_id": google_secrets["project_id"],
+            "auth_uri": google_secrets["auth_uri"],
+            "token_uri": google_secrets["token_uri"],
+            "auth_provider_x509_cert_url": google_secrets["auth_provider_x509_cert_url"],
+            "client_secret": google_secrets["client_secret"],
+            "redirect_uris": google_secrets["redirect_uris"],
+        }
+    }
+
+    flow = InstalledAppFlow.from_client_config(credentials_info, SCOPES)
+    creds = flow.run_local_server(port=0)
+
+    # Salva o token para evitar reautenticação repetitiva
+    with open("token.pickle", "wb") as token:
+        pickle.dump(creds, token)
+
+    return creds
+
 
 # Lista de empresas fornecidas
 empresas = [
@@ -34,23 +59,24 @@ competencia = datetime.datetime.now().strftime("%m/%Y")
 def autenticar_gmail():
     creds = None
 
-    if os.path.exists(TOKEN_PATH):
-        with open(TOKEN_PATH, "rb") as token:
-            creds = pickle.load(token)
 
+    if os.path.exists("token.pickle"):
+        with open("token.pickle", "rb") as token:
+            creds = pickle.load(token)
+    else:
+        creds = get_credentials()
+
+    # Garante que o token ainda é válido
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
         else:
-            if not os.path.exists(CREDENTIALS_PATH):
-                st.error(f"Arquivo de credenciais não encontrado: {CREDENTIALS_PATH}")
-                return None
-            
-            flow = InstalledAppFlow.from_client_secrets_file(CREDENTIALS_PATH, SCOPES)
-            creds = flow.run_local_server(port=8080)
-        
-        with open(TOKEN_PATH, "wb") as token:
-            pickle.dump(creds, token)
+            creds = get_credentials()
+
+    # Autenticando com Gmail API
+    service = build("gmail", "v1", credentials=creds)
+
+    st.write("Autenticado com sucesso no Gmail API!")
 
     return creds
 
@@ -69,7 +95,7 @@ def enviar_email(destinatario, assunto, corpo_email, nome_do_arquivo_pdf=None):
     msg["To"] = f"{destinatario}, negocios@taxall.com.br"
 
     # Converta a imagem para base64 e a insira no corpo do e-mail
-    with open(r"C:\Users\bruno.cardoso\Documents\projeto1\bruno_cardoso.jpg", "rb") as img_file:
+    with open("bruno_cardoso.jpg", "rb") as img_file:
         img_data = img_file.read()
         img_base64 = base64.b64encode(img_data).decode()
 
@@ -128,7 +154,7 @@ if st.button("Enviar Solicitação"):
         Atenciosamente,
         """
         
-        assunto = f"TAX ALL - Solicitação de Documentos - {empresa}"
+        assunto = f"TAX ALL - Solicitação de Documentos - {empresa} - {competencia}"
         # Alteração do encoding do assunto
         assunto = Header(assunto, "utf-8").encode()
         enviar_email(email_cliente, assunto, corpo_email)
