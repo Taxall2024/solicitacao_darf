@@ -14,9 +14,22 @@ from email.header import Header
 
 SCOPES = ["https://www.googleapis.com/auth/gmail.send"]
 #CREDENTIALS_PATH = 'credentials.json'
-#TOKEN_PATH = "token.pickle"
+TOKEN_PATH = "token.pickle"
 
 def get_credentials():
+    # Se já houver um token salvo, carregue-o
+    if os.path.exists(TOKEN_PATH):
+        with open(TOKEN_PATH, "rb") as token:
+            creds = pickle.load(token)
+        if creds and creds.valid:
+            return creds  # Retorna credenciais se ainda forem válidas
+        if creds and creds.expired and creds.refresh_token:
+            creds.refresh(Request())  # Atualiza token expirado
+            with open(TOKEN_PATH, "wb") as token:
+                pickle.dump(creds, token)
+            return creds
+
+    # Caso contrário, peça autenticação
     google_secrets = st.secrets["google_oauth"]
 
     credentials_info = {
@@ -32,7 +45,7 @@ def get_credentials():
     }
 
     flow = InstalledAppFlow.from_client_config(credentials_info, SCOPES)
-    creds = flow.run_local_server(port=0)
+    creds = flow.run_local_server(port=8080)
 
     # Salva o token para evitar reautenticação repetitiva
     with open("token.pickle", "wb") as token:
