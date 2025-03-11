@@ -17,14 +17,14 @@ SCOPES = ["https://www.googleapis.com/auth/gmail.send"]
 TOKEN_PATH = "token.pickle"
 
 def get_credentials():
-    # Se já houver um token salvo, carregue-o
+  
     if os.path.exists(TOKEN_PATH):
         with open(TOKEN_PATH, "rb") as token:
             creds = pickle.load(token)
         if creds and creds.valid:
-            return creds  # Retorna credenciais se ainda forem válidas
+            return creds  
         if creds and creds.expired and creds.refresh_token:
-            creds.refresh(Request())  # Atualiza token expirado
+            creds.refresh(Request())  
             with open(TOKEN_PATH, "wb") as token:
                 pickle.dump(creds, token)
             return creds
@@ -67,7 +67,8 @@ empresas = [
 ]
 
 # Obter o mês e ano atual
-competencia = datetime.datetime.now().strftime("%m/%Y")
+hoje = datetime.datetime.now()
+competencia = (hoje.replace(day=1) - datetime.timedelta(days=1)).strftime("%m/%Y")
 
 def autenticar_gmail():
     creds = None
@@ -100,7 +101,7 @@ def enviar_email(destinatario, assunto, corpo_email, nome_do_arquivo_pdf=None):
         return
     
     service = build("gmail", "v1", credentials=creds)
-
+    
     msg = MIMEMultipart()
     # Codificando o assunto corretamente
     msg["Subject"] = Header(assunto, "utf-8").encode()
