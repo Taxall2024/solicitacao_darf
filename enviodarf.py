@@ -150,7 +150,7 @@ st.title("Formulário de Solicitação de Documentos")
 empresa = st.selectbox("Selecione a Empresa", empresas)
 email_cliente = st.text_input("Email do Cliente")
 documentos = st.multiselect("Documentos Necessários", [
-    "DARF - INSS", "DARF - IRRF", "DARF - PIS", "DARF - COFINS", "Folha de Pagamento", 
+    "DARF - INSS", "DARF - IRRF", "DARF - IRPJ", "DARF - CSLL", "Planilha de Retenções e Notas Fiscais", "DARF - PIS", "DARF - COFINS", "Folha de Pagamento", 
     "Apuração de PIS e COFINS"
 ])
 
