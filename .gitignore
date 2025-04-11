@@ -1,0 +1,8 @@
+secrets.toml
+enviodarfcompensado.py
+enviofaturamento.py
+envioprocuracao.py
+Dados_Corrigidos.csv
+get_token.py
+client.json
+.streamlit

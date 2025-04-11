@@ -16,39 +16,34 @@ SCOPES = ["https://www.googleapis.com/auth/gmail.send"]
 #CREDENTIALS_PATH = 'credentials.json'
 TOKEN_PATH = "token.pickle"
 
+SCOPES = ["https://www.googleapis.com/auth/gmail.send"]
+TOKEN_PATH = "token.pickle"
+
 def get_credentials():
-  
+    # Tenta carregar credenciais salvas
     if os.path.exists(TOKEN_PATH):
         with open(TOKEN_PATH, "rb") as token:
             creds = pickle.load(token)
         if creds and creds.valid:
-            return creds  
+            return creds
         if creds and creds.expired and creds.refresh_token:
-            creds.refresh(Request())  
+            creds.refresh(Request())
             with open(TOKEN_PATH, "wb") as token:
                 pickle.dump(creds, token)
             return creds
 
-    # Caso contrário, peça autenticação
-    google_secrets = st.secrets["google_oauth"]
+    # Caso contrário, inicia o fluxo de autenticação
+    flow = InstalledAppFlow.from_client_secrets_file(
+        "client.json",
+        scopes=SCOPES
+    )
+    creds = flow.run_local_server(
+        port=8080,
+        access_type='offline', # <- CORRETO: era 'acess_type'
+        prompt='consent'
+    )
 
-    credentials_info = {
-        "web": {
-            "client_id": google_secrets["client_id"],
-            "project_id": google_secrets["project_id"],
-            "auth_uri": google_secrets["auth_uri"],
-            "token_uri": google_secrets["token_uri"],
-            "auth_provider_x509_cert_url": google_secrets["auth_provider_x509_cert_url"],
-            "client_secret": google_secrets["client_secret"],
-            "redirect_uris": google_secrets["redirect_uris"],
-        }
-    }
-
-    flow = InstalledAppFlow.from_client_config(credentials_info, SCOPES)
-    creds = flow.run_local_server(port=8080)
-
-    # Salva o token para evitar reautenticação repetitiva
-    with open("token.pickle", "wb") as token:
+    with open(TOKEN_PATH, "wb") as token:
         pickle.dump(creds, token)
 
     return creds
@@ -56,13 +51,13 @@ def get_credentials():
 
 # Lista de empresas fornecidas
 empresas = [
-    "3EX", "Alfa e Omega", "ANGELO SOM", "ALFASEG", "APPSERVICE", "ATIVA SYSTEM", "BRASFORT ADM", "BRASFORT SEG", 
+    "3EX", "Adtel",  "Alfa e Omega", "ANGELO SOM", "ALFASEG", "Andrade Pinheiro", "APPSERVICE", "ATIVA SYSTEM", "BRASFORT ADM", "BRASFORT SEG", 
     "CARISE", "CIENGE ENGENHARIA", "CIENGE TELECOM", "CILIA", "CRETA", "DIGIX", "ESPAÇO MARKETING", 
     "EURO SEGURANÇA", "EURO SERV", "EUROSEG", "FLAVIA ELIZANGELA", "G&E", "G9", "GLOBAL SERVIÇOS", "GLOBALTECH", 
     "GRUPO 5 ESTRELAS", "GSI SERVIÇOS", "INCRO", "JAUA", "JAVA", "LEMARC", "LIMPORT MACAÉ", "LPT GESTÃO", 
     "M5 SEGURANÇA", "MASTROS SEGURANÇA", "MASTROS SERVIÇOS", "MÁXIMA", "MAXTEC", "MUNDO DIGITAL", 
     "ORCALI LIMPEZA", "ORCALI SEGURANÇA", "ORCALI SERVIÇOS", "PALMACEA", "PM LOCAÇÕES", "PMT", "PORTLIMP", 
-    "QUALITY MAX", "RIO GRANDENSE", "SOLLO SERVIÇOS", "TRIUNFO SEGURANÇA", "TRIUNFO SERVIÇOS", 
+    "QUALITY MAX", "RIO GRANDENSE", "SCALA", "SOLLO SERVIÇOS", "TRIUNFO SEGURANÇA", "TRIUNFO SERVIÇOS", 
     "TRIUNFO SERVIÇOS", "ULTRA E LEDS", "UNINEURO NEUROCIRURGIA", "UNISERV", "VISAN", "WGA BIO", "WGA SEGURANÇA"
 ]
 
@@ -125,7 +120,13 @@ def enviar_email(destinatario, assunto, corpo_email, nome_do_arquivo_pdf=None):
             </ul>
             <p>Caso haja alguma dúvida ou necessidade de esclarecimento adicional, estamos à disposição para auxiliá-los.</p>
             <p>Agradecemos pela colaboração e ficamos no aguardo dos documentos.</p>
+            <p>--</p>
             <p>Atenciosamente,</p>
+            <p>---------------------------------------------------------------------------</p>    
+            <p style="font-style: italic;">Sua opinião é muito importante para nós!</p>
+            <p style="font-style: italic;">Estamos constantemente empenhados em garantir que nossos clientes alcancem os melhores resultados.</p>
+            <p style="font-style: italic;">Por isso, é fundamental para nós ouvir o que você tem a dizer, pois isso nos permite continuar aprimorando nossos serviços.</p>
+            <p style="font-style: italic;">Participe da pesquisa: link: <a href="https://b24-7r4xgz.bitrix24.site/NPS%20Tax%20All/" target="_blank">https://b24-7r4xgz.bitrix24.site/NPS%20Tax%20All/</a></p>
             <p><img src="data:image/jpg;base64,{img_base64}" alt="Assinatura" /></p>
         </body>
     </html>
