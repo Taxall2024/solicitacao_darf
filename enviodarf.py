@@ -104,7 +104,7 @@ def enviar_email(destinatario, assunto, corpo_email, nome_do_arquivo_pdf=None):
     msg["To"] = f"{destinatario}, negocios@taxall.com.br"
 
     # Converta a imagem para base64 e a insira no corpo do e-mail
-    with open("bruno_cardoso.jpg", "rb") as img_file:
+    with open("bruno_cardoso.png", "rb") as img_file:
         img_data = img_file.read()
         img_base64 = base64.b64encode(img_data).decode()
 
@@ -121,12 +121,7 @@ def enviar_email(destinatario, assunto, corpo_email, nome_do_arquivo_pdf=None):
             <p>Caso haja alguma dúvida ou necessidade de esclarecimento adicional, estamos à disposição para auxiliá-los.</p>
             <p>Agradecemos pela colaboração e ficamos no aguardo dos documentos.</p>
             <p>--</p>
-            <p>Atenciosamente,</p>
-            <p>---------------------------------------------------------------------------</p>    
-            <p style="font-style: italic;">Sua opinião é muito importante para nós!</p>
-            <p style="font-style: italic;">Estamos constantemente empenhados em garantir que nossos clientes alcancem os melhores resultados.</p>
-            <p style="font-style: italic;">Por isso, é fundamental para nós ouvir o que você tem a dizer, pois isso nos permite continuar aprimorando nossos serviços.</p>
-            <p style="font-style: italic;">Participe da pesquisa: link: <a href="https://b24-7r4xgz.bitrix24.site/NPS%20Tax%20All/" target="_blank">https://b24-7r4xgz.bitrix24.site/NPS%20Tax%20All/</a></p>
+            <p>Atenciosamente,</p> 
             <p><img src="data:image/jpg;base64,{img_base64}" alt="Assinatura" /></p>
         </body>
     </html>
